@@ -75,6 +75,83 @@
   .topic-body { transition: all 0.3s ease; }
   .topic-body.collapsed { display: none; }
 
+  /* ===== БЛОК ПРОГРАММЫ КРУЖКА ===== */
+  .program-block {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #fbbf24;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .program-block::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #f59e0b, #ef4444, #f59e0b);
+    background-size: 200% 100%;
+    animation: shimmer 3s linear infinite;
+  }
+  .program-block-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    font-weight: 700;
+    color: #92400e;
+    font-size: 15px;
+  }
+  .program-block-header i {
+    color: #f59e0b;
+    font-size: 18px;
+  }
+  .program-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .program-row label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #78350f;
+    min-width: 140px;
+  }
+  .program-input {
+    flex: 1;
+    min-width: 200px;
+    border: 1px solid #fbbf24;
+    background: white;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  .program-input:focus {
+    outline: none;
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+  }
+  .program-attach-btn {
+    background: white;
+    border: 1px dashed #f59e0b;
+    color: #b45309;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all .2s;
+    font-family: inherit;
+  }
+  .program-attach-btn:hover { background: #fef3c7; border-color: #d97706; }
+
   .sidebar {
     background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.06);
     padding: 20px; position: sticky; top: 20px; max-height: calc(100vh - 40px); overflow-y: auto;
@@ -220,13 +297,6 @@
             <i id="newCategoryIconPreview" class="fas fa-star"></i>
           </button>
         </div>
-         <!--<div class="form-row">
-          <select id="newCategoryBtnClass" class="flex-1 border border-gray-200 rounded-lg px-2 py-1.5 text-xs bg-white">
-            <option value="btn-pdf">📘 Стиль: PDF (основной)</option>
-            <option value="btn-extra">🎨 Стиль: Дополнительный</option>
-            <option value="btn-final">✨ Стиль: Финальный</option>
-          </select>
-        </div> -->
         <button type="button" class="add-btn" onclick="addCustomCategory()">
           <i class="fas fa-plus"></i> Добавить категорию
         </button>
@@ -262,6 +332,36 @@
       <div class="md:col-span-2">
         <label class="text-sm font-medium text-gray-700 mb-1 block">Подзаголовок курса</label>
         <input id="courseSubtitle" type="text" placeholder="Интерактивные материалы и конспекты на 2 года обучения" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+      </div>
+    </div>
+
+    <!-- ===== БЛОК ПРОГРАММЫ КРУЖКА ===== -->
+    <div class="program-block">
+      <div class="program-block-header">
+        <i class="fas fa-file-signature"></i>
+        Программа кружка (курса)
+      </div>
+      <div class="program-row">
+        <label><i class="fas fa-heading"></i> Название:</label>
+        <input id="programName" type="text" placeholder="WEB-РАЗРАБОТКА 2.0" class="program-input" oninput="updateProgramData()">
+      </div>
+      <div class="program-row">
+        <label><i class="fas fa-paperclip"></i> Файл программы:</label>
+        <label class="program-attach-btn">
+          <i class="fas fa-file-pdf"></i> Выбрать файл
+          <input type="file" class="file-input-hidden" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,image/*" onchange="attachProgramFile(this)">
+        </label>
+        <label class="program-attach-btn" style="border-color:#10b981; color:#047857;">
+          <i class="fas fa-link"></i> Или вставить ссылку
+          <input type="url" id="programLink" placeholder="https://..." class="file-input-hidden" oninput="updateProgramLink(this.value)">
+        </label>
+        <span id="programFileChip" class="file-chip" style="display:none;"></span>
+        <button id="programClearBtn" onclick="clearProgramFile()" class="text-xs text-red-500 hover:text-red-700" style="display:none;" title="Очистить файл">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="program-row" style="margin-top:4px;">
+        <input id="programLinkDisplay" type="url" placeholder="https://... (ссылка на программу)" class="program-input" oninput="updateProgramLink(this.value)" style="font-size:12px;">
       </div>
     </div>
 
@@ -336,6 +436,16 @@ const THEMES = {
 
 let selectedTheme = 'cyber';
 
+// ===== ДАННЫЕ ПРОГРАММЫ КРУЖКА =====
+let programData = {
+  name: '',
+  fileDataUrl: null,
+  fileLink: '',
+  fileName: '',
+  fileType: '',
+  mode: 'file' // 'file' или 'link'
+};
+
 const DEFAULT_FILE_TYPES = [
   { key: 'pdf',       label: 'Конспект',                icon: 'fas fa-file-pdf',     btnClass: 'btn-pdf',    builtIn: true },
   { key: 'extra',     label: 'Дополнительный материал', icon: 'fas fa-link',         btnClass: 'btn-extra',  builtIn: true },
@@ -372,7 +482,7 @@ const ICON_OPTIONS = [
   'fas fa-globe','fas fa-book','fas fa-book-open','fas fa-bookmark',
   'fas fa-graduation-cap','fas fa-chalkboard-teacher','fas fa-school',
   'fas fa-laptop-code','fas fa-desktop','fas fa-mobile-alt','fas fa-tablet-alt',
-  'fas','fas fa-terminal','fas fa-bug','fas fa-database',
+  'fas fa-code','fas fa-terminal','fas fa-bug','fas fa-database',
   'fas fa-star','fas fa-heart','fas fa-trophy','fas fa-medal','fas fa-award',
   'fas fa-check-circle','fas fa-check-square','fas fa-clipboard-check',
   'fas fa-image','fas fa-images','fas fa-camera','fas fa-palette',
@@ -420,6 +530,66 @@ function showToast(message, type = 'success') {
   toast.classList.add('show');
   clearTimeout(toast._timeout);
   toast._timeout = setTimeout(() => toast.classList.remove('show'), 4000);
+}
+
+// ===== ФУНКЦИИ ДЛЯ РАБОТЫ С ПРОГРАММОЙ =====
+function updateProgramData() {
+  programData.name = document.getElementById('programName').value;
+}
+
+function updateProgramLink(value) {
+  programData.fileLink = value;
+  if (value) programData.mode = 'link';
+}
+
+function attachProgramFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    programData.fileDataUrl = e.target.result;
+    programData.fileName = file.name;
+    programData.fileType = file.type;
+    programData.mode = 'file';
+    // Очищаем ссылку при загрузке файла
+    document.getElementById('programLinkDisplay').value = '';
+    programData.fileLink = '';
+    renderProgramFileChip();
+    showToast('Файл программы прикреплён: ' + file.name, 'success');
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearProgramFile() {
+  programData.fileDataUrl = null;
+  programData.fileName = '';
+  programData.fileType = '';
+  programData.mode = 'file';
+  renderProgramFileChip();
+  showToast('Файл программы удалён', 'info');
+}
+
+function renderProgramFileChip() {
+  const chip = document.getElementById('programFileChip');
+  const clearBtn = document.getElementById('programClearBtn');
+  const hasFile = !!programData.fileDataUrl;
+  const hasLink = !!programData.fileLink;
+  
+  if (hasFile) {
+    const shortName = programData.fileName.length > 25 
+      ? programData.fileName.substring(0, 22) + '...' 
+      : programData.fileName;
+    chip.innerHTML = `<i class="fas fa-file"></i> ${escapeHtml(shortName)}`;
+    chip.style.display = 'inline-flex';
+    clearBtn.style.display = 'inline-block';
+  } else if (hasLink) {
+    chip.innerHTML = `<i class="fas fa-link"></i> ссылка`;
+    chip.style.display = 'inline-flex';
+    clearBtn.style.display = 'none';
+  } else {
+    chip.style.display = 'none';
+    clearBtn.style.display = 'none';
+  }
 }
 
 function renderCategoriesList() {
@@ -470,7 +640,7 @@ function addCustomCategory() {
   const nameInput = document.getElementById('newCategoryName');
   const name = nameInput.value.trim();
   if (!name) { alert('Введите название категории'); return; }
-  const btnClass = document.getElementById('newCategoryBtnClass').value;
+  const btnClass = 'btn-extra';
   const key = 'custom_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
   customCategories.push({ key, label: name, icon: selectedNewIcon, btnClass, builtIn: false });
   enabledCategories.add(key);
@@ -510,12 +680,14 @@ function updateStats() {
   const enabled = enabledCategories.size;
   const custom = customCategories.length;
   const totalMaterials = topics.reduce((sum, t) => sum + t.files.length, 0);
+  const hasProgram = !!(programData.fileDataUrl || programData.fileLink);
   block.innerHTML = `
     <div>📊 Всего категорий: <b>${total}</b></div>
     <div>✅ Включено: <b>${enabled}</b></div>
     <div>✏️ Своих: <b>${custom}</b></div>
     <div>📚 Тем курса: <b>${topics.length}</b></div>
     <div>📎 Материалов: <b>${totalMaterials}</b></div>
+    <div>${hasProgram ? '📜 Программа: <b style="color:#10b981;">✓</b>' : '📜 Программа: <b style="color:#9ca3af;">—</b>'}</div>
   `;
 }
 
@@ -771,7 +943,8 @@ function loadExistingHTML() {
       if (!result.success) { showToast('Ошибка: ' + result.error, 'error'); return; }
       applyParsedData(result.data);
       const fileCount = result.data.topics.reduce((s,t)=>s+t.files.filter(f=>f.dataUrl).length,0);
-      showToast(`Документ загружен! Тем: ${result.data.topics.length}, файлов: ${fileCount}`, 'success');
+      const hasProgram = !!(result.data.program && (result.data.program.fileDataUrl || result.data.program.fileLink));
+      showToast(`Документ загружен! Тем: ${result.data.topics.length}, файлов: ${fileCount}${hasProgram ? ', программа: ✓' : ''}`, 'success');
     } catch(err) {
       console.error(err);
       showToast('Ошибка загрузки: ' + err.message, 'error');
@@ -817,6 +990,38 @@ function parseHTMLDocument(htmlString) {
       if (p) subtitle = stripTags(p.innerHTML).replace(/^\|\s*/, '').trim();
     }
     
+    // ===== ИЗВЛЕЧЕНИЕ ДАННЫХ ПРОГРАММЫ =====
+    const programBlock = doc.querySelector('.program-card');
+    let program = { name: '', fileDataUrl: null, fileLink: '', fileName: '', fileType: '', mode: 'file' };
+    
+    if (programBlock) {
+      const programBtn = programBlock.querySelector('.program-btn');
+      if (programBtn) {
+        const href = programBtn.getAttribute('href') || '';
+        const fileId = programBtn.getAttribute('data-file-id') || '';
+        const programNameEl = programBlock.querySelector('.program-name-text');
+        const programTitle = programNameEl ? programNameEl.textContent.trim() : '';
+        
+        program.name = programTitle;
+        
+        if (fileId && dataUrlMap[fileId]) {
+          program.mode = 'file';
+          program.fileDataUrl = dataUrlMap[fileId].dataUrl;
+          program.fileName = dataUrlMap[fileId].fileName || '';
+          program.fileType = dataUrlMap[fileId].fileType || '';
+        } else if (href.startsWith('data:')) {
+          program.mode = 'file';
+          program.fileDataUrl = href;
+          program.fileName = 'program';
+          const mimeMatch = href.match(/^data:([^;,]+)/);
+          if (mimeMatch) program.fileType = mimeMatch[1];
+        } else if (href && href !== '#') {
+          program.mode = 'link';
+          program.fileLink = href;
+        }
+      }
+    }
+    
     const themeCards = doc.querySelectorAll('.themes-grid .theme-card');
     const parsedTopics = [];
     
@@ -845,28 +1050,21 @@ function parseHTMLDocument(htmlString) {
           linkUrl: ''
         };
         
-        // 1. Если есть data-file-id, ищем в карте
         if (fileId && dataUrlMap[fileId]) {
           fileObj.mode = 'file';
           fileObj.dataUrl = dataUrlMap[fileId].dataUrl;
           fileObj.dataFileName = dataUrlMap[fileId].fileName || label;
           fileObj.dataFileType = dataUrlMap[fileId].fileType || '';
-        }
-        // 2. Прямой data URL в href
-        else if (href.startsWith('data:')) {
+        } else if (href.startsWith('data:')) {
           fileObj.mode = 'file';
           fileObj.dataUrl = href;
           fileObj.dataFileName = label;
           const mimeMatch = href.match(/^data:([^;,]+)/);
           if (mimeMatch) fileObj.dataFileType = mimeMatch[1];
-        }
-        // 3. Внешняя ссылка
-        else if (href.startsWith('http://') || href.startsWith('https://')) {
+        } else if (href.startsWith('http://') || href.startsWith('https://')) {
           fileObj.mode = 'link';
           fileObj.linkUrl = href;
-        }
-        // 4. Другая ссылка
-        else if (href && href !== '#') {
+        } else if (href && href !== '#') {
           fileObj.mode = 'link';
           fileObj.linkUrl = href;
         }
@@ -892,7 +1090,12 @@ function parseHTMLDocument(htmlString) {
     
     return {
       success: true,
-      data: { theme: detectedTheme, teacher, department, org, course, subtitle, topics: parsedTopics, customCategories: detectedCustomCategories }
+      data: { 
+        theme: detectedTheme, teacher, department, org, course, subtitle, 
+        topics: parsedTopics, 
+        customCategories: detectedCustomCategories,
+        program: program
+      }
     };
   } catch(err) {
     console.error('Ошибка парсинга:', err);
@@ -900,24 +1103,16 @@ function parseHTMLDocument(htmlString) {
   }
 }
 
-// ============ НАДЁЖНОЕ ИЗВЛЕЧЕНИЕ DATA URL ИЗ JS ============
 function extractDataUrlsFromJS(htmlString) {
   const map = {};
-  
   try {
-    // Ищем начало массива файлов
     const startMarker = 'const files = ';
     const startIdx = htmlString.indexOf(startMarker);
-    if (startIdx === -1) {
-      console.log('Маркер "const files = " не найден');
-      return map;
-    }
+    if (startIdx === -1) return map;
     
-    // Находим начало массива '['
     const arrStart = htmlString.indexOf('[', startIdx);
     if (arrStart === -1) return map;
     
-    // Находим конец массива - ищем сбалансированные скобки
     let depth = 0;
     let arrEnd = -1;
     let inString = false;
@@ -937,56 +1132,36 @@ function extractDataUrlsFromJS(htmlString) {
           depth++;
         } else if (ch === ']') {
           depth--;
-          if (depth === 0) {
-            arrEnd = i;
-            break;
-          }
+          if (depth === 0) { arrEnd = i; break; }
         }
       }
     }
     
-    if (arrEnd === -1) {
-      console.log('Конец массива не найден');
-      return map;
-    }
+    if (arrEnd === -1) return map;
     
     const filesStr = htmlString.substring(arrStart, arrEnd + 1);
-    console.log('Длина строки файлов:', filesStr.length);
     
-    // Пробуем JSON.parse
     try {
       const filesArray = JSON.parse(filesStr);
-      console.log('JSON успешно распарсен, файлов:', filesArray.length);
       filesArray.forEach(f => {
         if (f.id && f.dataUrl) {
-          map[f.id] = {
-            dataUrl: f.dataUrl,
-            fileName: f.fileName || '',
-            fileType: f.fileType || ''
-          };
+          map[f.id] = { dataUrl: f.dataUrl, fileName: f.fileName || '', fileType: f.fileType || '' };
         }
       });
     } catch(e) {
-      console.warn('JSON.parse не сработал, используем regex:', e.message);
-      // Fallback: ищем каждый файл отдельно через regex
-      // Формат: {"id":"file_0","dataUrl":"...","fileName":"...","fileType":"..."}
       const fileRegex = /\{\s*"id"\s*:\s*"([^"]+)"\s*,\s*"dataUrl"\s*:\s*"((?:[^"\\]|\\.)*)"\s*,\s*"fileName"\s*:\s*"((?:[^"\\]|\\.)*)"\s*,\s*"fileType"\s*:\s*"((?:[^"\\]|\\.)*)"\s*\}/g;
       let match;
-      let count = 0;
       while ((match = fileRegex.exec(filesStr)) !== null) {
         map[match[1]] = {
           dataUrl: match[2].replace(/\\"/g, '"').replace(/\\\\/g, '\\'),
           fileName: match[3].replace(/\\"/g, '"').replace(/\\\\/g, '\\'),
           fileType: match[4].replace(/\\"/g, '"').replace(/\\\\/g, '\\')
         };
-        count++;
       }
-      console.log('Regex нашёл файлов:', count);
     }
   } catch(e) {
     console.error('Критическая ошибка extractDataUrlsFromJS:', e);
   }
-  
   return map;
 }
 
@@ -1048,6 +1223,21 @@ function applyParsedData(data) {
   if (data.department) document.getElementById('department').value = data.department;
   if (data.course) document.getElementById('courseName').value = data.course;
   if (data.subtitle) document.getElementById('courseSubtitle').value = data.subtitle;
+  
+  // Применяем данные программы
+  if (data.program) {
+    programData = {
+      name: data.program.name || '',
+      fileDataUrl: data.program.fileDataUrl || null,
+      fileLink: data.program.fileLink || '',
+      fileName: data.program.fileName || '',
+      fileType: data.program.fileType || '',
+      mode: data.program.mode || 'file'
+    };
+    document.getElementById('programName').value = programData.name;
+    document.getElementById('programLinkDisplay').value = programData.mode === 'link' ? programData.fileLink : '';
+    renderProgramFileChip();
+  }
   
   if (data.customCategories && data.customCategories.length > 0) {
     data.customCategories.forEach(cat => {
@@ -1118,6 +1308,71 @@ const ORIGINAL_CSS = `
   .badge::after { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); animation: shimmer 3s ease-in-out infinite; }
   .badge i { color: var(--primary2); font-size: 1.2rem; }
   [data-theme="light"] .badge { color: #ffffff; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+  
+  /* ===== ПРОГРАММА КРУЖКА ===== */
+  .program-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 2rem;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 25px 50px -12px var(--shadow-color);
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 1s ease-out 0.1s backwards;
+  }
+  .program-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--accent), var(--accent-pink));
+    background-size: 200% 100%;
+    animation: shimmer 3s linear infinite;
+  }
+  .program-card-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-main);
+  }
+  .program-card-title i {
+    color: var(--primary);
+    font-size: 1.5rem;
+  }
+  .program-name-text {
+    font-size: 1rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    font-style: italic;
+  }
+  .program-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: white;
+    border-radius: 40px;
+    font-weight: 700;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: all 0.3s;
+    box-shadow: 0 10px 25px -5px color-mix(in srgb, var(--primary) 50%, transparent);
+    width: 100%;
+  }
+  .program-btn:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 15px 35px -8px color-mix(in srgb, var(--primary) 60%, transparent);
+  }
+  .program-btn i { font-size: 1.3rem; }
+  
   .dropdown-nav { margin: 1.5rem 0 0.5rem; position: relative; z-index: 50; }
   .dropdown-nav summary { background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 60px; padding: 0.9rem 2.2rem; font-weight: 600; font-size: 1rem; color: var(--text-main); cursor: pointer; transition: all 0.4s; display: flex; align-items: center; gap: 12px; list-style: none; justify-content: center; }
   .dropdown-nav summary::-webkit-details-marker { display: none; }
@@ -1171,6 +1426,46 @@ function buildHTML() {
 
   const dataUrlFiles = [];
   let fileIndex = 0;
+
+  // ===== БЛОК ПРОГРАММЫ =====
+  let programHtml = '';
+  const programName = document.getElementById('programName').value.trim();
+  const hasProgramFile = !!programData.fileDataUrl;
+  const hasProgramLink = !!programData.fileLink;
+  
+  if (hasProgramFile || hasProgramLink) {
+    const displayName = programName || `Программа курса «${data.course}»`;
+    let programHref = '';
+    let programFileIdAttr = '';
+    
+    if (hasProgramFile) {
+      const fileId = `file_${fileIndex++}`;
+      dataUrlFiles.push({ 
+        id: fileId, 
+        dataUrl: programData.fileDataUrl, 
+        fileName: programData.fileName || 'programma.pdf', 
+        fileType: programData.fileType || 'application/pdf' 
+      });
+      programHref = '#';
+      programFileIdAttr = `data-file-id="${fileId}"`;
+    } else {
+      programHref = escapeAttr(programData.fileLink);
+    }
+    
+    programHtml = `
+  <div class="program-card animate-on-scroll">
+    <div class="program-card-title">
+      <i class="fas fa-file-signature"></i>
+      Программа объединения
+    </div>
+    <div class="program-name-text">«${escapeHtml(displayName)}»</div>
+    <a href="${programHref}" ${programFileIdAttr} class="program-btn program-link" target="_blank" rel="noopener">
+      <i class="fas fa-file-pdf"></i>
+      <span>Открыть программу</span>
+    </a>
+  </div>
+    `;
+  }
 
   const topicsHtml = topics.map((t, idx) => {
     const title = escapeHtml(t.title || `Тема ${idx + 1}`);
@@ -1234,35 +1529,44 @@ function buildHTML() {
       } catch(e) { console.error('Ошибка конвертации файла', f.id, e); }
     });
     
+    function handleLinkClick(link, blobInfo) {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const isPdf = blobInfo.fileType === 'application/pdf' || blobInfo.fileName.toLowerCase().endsWith('.pdf');
+        const isImage = blobInfo.fileType.startsWith('image/');
+        
+        if (isPdf || isImage) {
+          const win = window.open('', '_blank');
+          if (win) {
+            if (isImage) {
+              win.document.write('<html><head><title>' + blobInfo.fileName + '</title><style>body{margin:0;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh;}img{max-width:100%;max-height:100vh;}</style></head><body><img src="' + blobInfo.url + '"></body></html>');
+            } else {
+              win.document.write('<html><head><title>' + blobInfo.fileName + '</title></head><body style="margin:0;"><iframe src="' + blobInfo.url + '" style="width:100vw;height:100vh;border:none;"></iframe></body></html>');
+            }
+            win.document.close();
+          }
+        } else {
+          const a = document.createElement('a');
+          a.href = blobInfo.url;
+          a.download = blobInfo.fileName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        }
+      });
+    }
+    
     document.querySelectorAll('.material-link').forEach(link => {
       const fileId = link.getAttribute('data-file-id');
       const blobInfo = blobUrls[fileId];
-      if (blobInfo) {
-        link.addEventListener('click', function(e) {
-          e.preventDefault();
-          const isPdf = blobInfo.fileType === 'application/pdf' || blobInfo.fileName.toLowerCase().endsWith('.pdf');
-          const isImage = blobInfo.fileType.startsWith('image/');
-          
-          if (isPdf || isImage) {
-            const win = window.open('', '_blank');
-            if (win) {
-              if (isImage) {
-                win.document.write('<html><head><title>' + blobInfo.fileName + '</title><style>body{margin:0;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh;}img{max-width:100%;max-height:100vh;}</style></head><body><img src="' + blobInfo.url + '"></body></html>');
-              } else {
-                win.document.write('<html><head><title>' + blobInfo.fileName + '</title></head><body style="margin:0;"><iframe src="' + blobInfo.url + '" style="width:100vw;height:100vh;border:none;"></iframe></body></html>');
-              }
-              win.document.close();
-            }
-          } else {
-            const a = document.createElement('a');
-            a.href = blobInfo.url;
-            a.download = blobInfo.fileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-          }
-        });
-      }
+      if (blobInfo) handleLinkClick(link, blobInfo);
+    });
+    
+    // Обработка кнопки программы
+    document.querySelectorAll('.program-link').forEach(link => {
+      const fileId = link.getAttribute('data-file-id');
+      const blobInfo = blobUrls[fileId];
+      if (blobInfo) handleLinkClick(link, blobInfo);
     });
   })();` : '';
 
@@ -1307,6 +1611,8 @@ function buildHTML() {
       <h2 class="badge"><i class="fas fa-chalkboard-user"></i> ${escapeHtml(data.teacher).toUpperCase()}</h2>
     </div>
   </div>
+
+  ${programHtml}
 
   <details class="dropdown-nav animate-on-scroll">
     <summary>
@@ -1431,6 +1737,7 @@ function loadDemo() {
   document.getElementById('department').value = 'Отдел компьютерных технологий';
   document.getElementById('courseName').value = 'WEB-разработка';
   document.getElementById('courseSubtitle').value = 'Интерактивные материалы и конспекты на 2 года обучения';
+  document.getElementById('programName').value = 'WEB-РАЗРАБОТКА 2.0';
 
   topics = [];
   topicIdCounter = 0;
@@ -1457,7 +1764,9 @@ function loadDemo() {
 
 function clearAll() {
   if (!confirm('Очистить все поля?')) return;
-  ['teacherName','orgName','department','courseName','courseSubtitle'].forEach(id => document.getElementById(id).value = '');
+  ['teacherName','orgName','department','courseName','courseSubtitle','programName','programLinkDisplay'].forEach(id => document.getElementById(id).value = '');
+  programData = { name: '', fileDataUrl: null, fileLink: '', fileName: '', fileType: '', mode: 'file' };
+  renderProgramFileChip();
   topics = [];
   topicIdCounter = 0;
   collapsedTopics.clear();
@@ -1468,13 +1777,13 @@ function clearAll() {
   showToast('Все поля очищены', 'info');
 }
 
-// ИНИЦИАЛИЗАЦИЯ - БЕЗ СКРОЛЛА
+// ИНИЦИАЛИЗАЦИЯ
 renderThemePicker();
 renderCategoriesList();
 document.getElementById('newCategoryIconPreview').className = selectedNewIcon;
-addTopic(null, false); // scrollTo = false при инициализации
+addTopic(null, false);
+renderProgramFileChip();
 
-  // Гарантированная прокрутка наверх при загрузке страницы
 window.addEventListener('load', () => {
   window.scrollTo(0, 0);
 });
