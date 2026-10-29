@@ -1468,10 +1468,16 @@ function clearAll() {
   showToast('Все поля очищены', 'info');
 }
 
+// ИНИЦИАЛИЗАЦИЯ - БЕЗ СКРОЛЛА
 renderThemePicker();
 renderCategoriesList();
 document.getElementById('newCategoryIconPreview').className = selectedNewIcon;
-addTopic();
+addTopic(null, false); // scrollTo = false при инициализации
+
+  // Гарантированная прокрутка наверх при загрузке страницы
+window.addEventListener('load', () => {
+  window.scrollTo(0, 0);
+});
 </script>
 </body>
 </html>
