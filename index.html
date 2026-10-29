@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Конструктор ЭОМК педагога</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.0/index.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/montserrat@5.0.0/index.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  body { font-family: 'Inter', sans-serif; background: #f3f4f6; }
+  h1,h2,h3,.font-display { font-family: 'Montserrat', sans-serif; }
+  .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  .card { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+  .topic-card { border-left: 4px solid #667eea; }
+  .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); transition: all .3s; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(102,126,234,0.4); }
+  .file-input-hidden { display: none; }
+  .file-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 20px; font-size: 12px; color: #4338ca; }
+  input, textarea, select { transition: all .2s; }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.15); }
+  .preview-frame { background: white; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
+  .scroll-area { max-height: 75vh; overflow-y: auto; }
+  .scroll-area::-webkit-scrollbar { width: 8px; }
+  .scroll-area::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 4px; }
+
+  .material-row { background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  .add-material-wrap { position: relative; display: inline-block; margin-top: 0.5rem; }
+  .add-material-btn {
+    background: white; border: 1px dashed #a5b4fc; color: #4f46e5;
+    padding: 6px 14px; border-radius: 8px; font-size: 14px; font-weight: 500;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    transition: all .2s; font-family: inherit;
+  }
+  .add-material-btn:hover { background: #eef2ff; border-color: #6366f1; }
+  .add-material-list {
+    display: none; position: absolute; bottom: 100%; left: 0; margin-bottom: 6px;
+    background: white; border: 1px solid #e5e7eb; border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 1000; min-width: 280px;
+    overflow: hidden; max-height: 400px; overflow-y: auto;
+  }
+  .add-material-list.open { display: block; }
+  .add-material-list button {
+    display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+    padding: 10px 14px; font-size: 14px; color: #374151; transition: background .15s;
+    background: transparent; border: none; cursor: pointer; font-family: inherit;
+  }
+  .add-material-list button:hover { background: #f3f4f6; color: #4f46e5; }
+  .add-material-list button i { width: 20px; text-align: center; color: #6366f1; }
+
+  .mode-toggle { display: inline-flex; background: #f3f4f6; border-radius: 8px; padding: 2px; }
+  .mode-toggle button { padding: 4px 10px; font-size: 12px; border-radius: 6px; color: #6b7280; transition: all .2s; background: transparent; border: none; cursor: pointer; font-family: inherit; }
+  .mode-toggle button.active { background: white; color: #4338ca; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: 500; }
+
+  .theme-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .theme-card-pick { position: relative; cursor: pointer; border: 2px solid #e5e7eb; border-radius: 12px; overflow: hidden; transition: all .2s; background: white; }
+  .theme-card-pick:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
+  .theme-card-pick.selected { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.25); }
+  .theme-card-pick .preview { height: 70px; position: relative; overflow: hidden; }
+  .theme-card-pick .preview .hero-mini { height: 45px; }
+  .theme-card-pick .preview .card-mini { position: absolute; bottom: 4px; left: 8px; right: 8px; height: 18px; border-radius: 4px; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .theme-card-pick .name { padding: 6px 8px; font-size: 12px; font-weight: 500; text-align: center; color: #374151; }
+  .theme-card-pick .check { position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; border-radius: 50%; background: #667eea; color: white; display: none; align-items: center; justify-content: center; font-size: 12px; }
+  .theme-card-pick.selected .check { display: flex; }
+
+  .collapsible-header { cursor: pointer; user-select: none; display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
+  .collapsible-header:hover { opacity: 0.8; }
+  .collapsible-icon { transition: transform 0.3s; font-size: 0.9rem; }
+  .collapsible-header.collapsed .collapsible-icon { transform: rotate(-90deg); }
+  .collapsible-content { transition: max-height 0.4s ease, opacity 0.3s ease; opacity: 1; max-height: 2000px; overflow: hidden; }
+  .collapsible-content.collapsed { max-height: 0; opacity: 0; }
+
+  .topic-header { cursor: pointer; user-select: none; }
+  .topic-body { transition: all 0.3s ease; }
+  .topic-body.collapsed { display: none; }
+
+  .sidebar {
+    background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    padding: 20px; position: sticky; top: 20px; max-height: calc(100vh - 40px); overflow-y: auto;
+  }
+  .sidebar::-webkit-scrollbar { width: 6px; }
+  .sidebar::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 4px; }
+
+  .sidebar-title {
+    font-size: 1.1rem; font-weight: 700; color: #1f2937; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px; padding-bottom: 10px; border-bottom: 2px solid #e5e7eb;
+  }
+  .sidebar-title i { color: #667eea; }
+
+  .category-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px;
+    margin-bottom: 8px; transition: all .2s;
+  }
+  .category-item:hover { background: #f3f4f6; border-color: #c7d2fe; }
+  .category-item.disabled { opacity: 0.5; }
+
+  .category-checkbox { width: 20px; height: 20px; cursor: pointer; accent-color: #667eea; flex-shrink: 0; }
+
+  .category-info { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .category-icon {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; flex-shrink: 0;
+  }
+  .category-label { font-size: 13px; font-weight: 500; color: #374151;  overflow: hidden; text-overflow: ellipsis; }
+  .category-badge { font-size: 10px; padding: 2px 6px; border-radius: 10px; background: #eef2ff; color: #4338ca; font-weight: 600; flex-shrink: 0; }
+  .category-delete {
+    background: transparent; border: none; color: #ef4444; cursor: pointer;
+    padding: 4px; border-radius: 6px; transition: all .2s; flex-shrink: 0; opacity: 0.6;
+  }
+  .category-delete:hover { opacity: 1; background: #fee2e2; }
+
+  .add-category-form {
+    background: linear-gradient(135deg, #f9fafb 0%, #eef2ff 100%);
+    border: 1px dashed #a5b4fc; border-radius: 10px; padding: 12px; margin-top: 12px;
+  }
+  .add-category-form .form-row { display: flex; gap: 6px; margin-bottom: 8px; }
+  .add-category-form input { flex: 1; border: 1px solid #e5e7eb; border-radius: 8px; padding: 6px 10px; font-size: 13px; background: white; width: 80%;}
+  .add-category-form .icon-picker {
+    width: 40px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 6px;
+    text-align: center; background: white; cursor: pointer; font-size: 14px; color: #667eea;
+  }
+  .add-category-form .add-btn {
+    width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white; border: none; border-radius: 8px; padding: 8px;
+    font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; font-family: inherit;
+  }
+  .add-category-form .add-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(102,126,234,0.3); }
+
+  .icon-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center; }
+  .icon-modal.open { display: flex; }
+  .icon-modal-content { background: white; border-radius: 16px; padding: 20px; max-width: 400px; width: 90%; max-height: 70vh; overflow-y: auto; }
+  .icon-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin-top: 12px; }
+  .icon-option {
+    aspect-ratio: 1; border: 1px solid #e5e7eb; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all .2s; font-size: 16px; color: #4b5563;
+  }
+  .icon-option:hover { background: #eef2ff; border-color: #667eea; color: #667eea; transform: scale(1.1); }
+  .icon-option.selected { background: #667eea; color: white; border-color: #667eea; }
+
+  .sidebar-section { margin-bottom: 20px; }
+  .sidebar-section-title {
+    font-size: 0.8rem; font-weight: 600; color: #6b7280;
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .sidebar-section-title i { color: #9ca3af; font-size: 0.75rem; }
+
+  .quick-actions { display: flex; gap: 6px; margin-bottom: 12px; }
+  .quick-action-btn {
+    flex: 1; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px;
+    padding: 6px 10px; font-size: 11px; font-weight: 500; color: #4b5563;
+    cursor: pointer; transition: all .2s; font-family: inherit;
+  }
+  .quick-action-btn:hover { background: #eef2ff; border-color: #667eea; color: #667eea; }
+
+  .toast {
+    position: fixed; bottom: 20px; right: 20px; background: white;
+    border-left: 4px solid #10b981; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    padding: 14px 20px; border-radius: 10px; z-index: 9999;
+    display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500;
+    transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1);
+    max-width: 400px;
+  }
+  .toast.show { transform: translateX(0); }
+  .toast.error { border-left-color: #ef4444; }
+  .toast.info { border-left-color: #3b82f6; }
+  .toast i { font-size: 1.2rem; }
+  .toast.success i { color: #10b981; }
+  .toast.error i { color: #ef4444; }
+  .toast.info i { color: #3b82f6; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<header class="gradient-bg text-white py-6 shadow-lg">
+  <div class="max-w-[1600px] mx-auto px-6 flex items-center justify-between flex-wrap gap-3">
+    <div>
+      <h1 class="text-3xl font-bold font-display">🎓 Конструктор ЭОМК</h1>
+      <p class="text-purple-100 text-sm mt-1">Создайте портфолио педагога и скачайте готовый HTML</p>
+    </div>
+    <div class="flex gap-2 flex-wrap">
+      <button onclick="loadExistingHTML()" class="bg-emerald-500/80 hover:bg-emerald-500 px-4 py-2 rounded-lg text-sm backdrop-blur transition" title="Загрузить ранее созданный HTML-документ для редактирования">
+        <i class="fas fa-file-import"></i> Загрузить HTML
+      </button>
+      <button onclick="loadDemo()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm backdrop-blur">📋 Демо-данные</button>
+      <button onclick="clearAll()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm backdrop-blur">🗑 Очистить</button>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-[1600px] mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-[280px_1fr_1fr] gap-6">
+
+  <aside class="sidebar">
+    <div class="sidebar-title"><i class="fas fa-sliders-h"></i> Настройки материалов</div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title"><i class="fas fa-bolt"></i> Быстрые действия</div>
+      <div class="quick-actions">
+        <button class="quick-action-btn" onclick="enableAllCategories()"><i class="fas fa-check-double"></i> Вкл. все</button>
+        <button class="quick-action-btn" onclick="disableAllCategories()"><i class="fas fa-times"></i> Выкл. все</button>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title"><i class="fas fa-list-check"></i> Категории материалов</div>
+      <div id="categoriesList"></div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title"><i class="fas fa-plus-circle"></i> Своя категория</div>
+      <div class="add-category-form">
+        <div class="form-row">
+          <input type="text" id="newCategoryName" placeholder="Название категории" maxlength="40">
+          <button type="button" class="icon-picker" onclick="openIconModal()" title="Выбрать иконку">
+            <i id="newCategoryIconPreview" class="fas fa-star"></i>
+          </button>
+        </div>
+        <div class="form-row">
+          <select id="newCategoryBtnClass" class="flex-1 border border-gray-200 rounded-lg px-2 py-1.5 text-xs bg-white">
+            <option value="btn-pdf">📘 Стиль: PDF (основной)</option>
+            <option value="btn-extra">🎨 Стиль: Дополнительный</option>
+            <option value="btn-final">✨ Стиль: Финальный</option>
+          </select>
+        </div>
+        <button type="button" class="add-btn" onclick="addCustomCategory()">
+          <i class="fas fa-plus"></i> Добавить категорию
+        </button>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title"><i class="fas fa-chart-pie"></i> Статистика</div>
+      <div id="statsBlock" style="font-size: 12px; color: #6b7280; line-height: 1.8;"></div>
+    </div>
+  </aside>
+
+  <section class="card p-6 scroll-area">
+    <h2 class="text-xl font-bold mb-4 text-gray-800">📝 Основные данные</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div>
+        <label class="text-sm font-medium text-gray-700 mb-1 block">ФИО педагога</label>
+        <input id="teacherName" type="text" placeholder="Иванова Мария Петровна" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+      </div>
+      <div>
+        <label class="text-sm font-medium text-gray-700 mb-1 block">Название объединения</label>
+        <input id="orgName" type="text" placeholder="Областной Дворец творчества детей и молодежи" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+      </div>
+      <div>
+        <label class="text-sm font-medium text-gray-700 mb-1 block">Отдел / подразделение</label>
+        <input id="department" type="text" placeholder="Отдел компьютерных технологий" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+      </div>
+      <div>
+        <label class="text-sm font-medium text-gray-700 mb-1 block">Название курса / темы</label>
+        <input id="courseName" type="text" placeholder="WEB-разработка" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+      </div>
+      <div class="md:col-span-2">
+        <label class="text-sm font-medium text-gray-700 mb-1 block">Подзаголовок курса</label>
+        <input id="courseSubtitle" type="text" placeholder="Интерактивные материалы и конспекты на 2 года обучения" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+      </div>
+    </div>
+
+    <div class="mt-6 mb-3">
+      <div class="collapsible-header" onclick="toggleCollapsible('themeSection', this)">
+        <h2 class="text-xl font-bold text-gray-800">🎨 Шаблон оформления</h2>
+        <i class="fas fa-chevron-down collapsible-icon"></i>
+      </div>
+      <div id="themeSection" class="collapsible-content">
+        <div id="themePicker" class="theme-picker mt-3"></div>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between mt-6 mb-3">
+      <h2 class="text-xl font-bold text-gray-800">📚 Темы курса</h2>
+      <button onclick="addTopic()" class="btn-primary text-white px-4 py-2 rounded-lg text-sm font-medium">+ Добавить тему</button>
+    </div>
+
+    <div id="topicsContainer" class="space-y-4"></div>
+
+    <div class="mt-4 flex justify-center">
+      <button onclick="addTopic()" class="btn-primary text-white px-6 py-3 rounded-lg font-medium w-full">
+        <i class="fas fa-plus"></i> Добавить тему
+      </button>
+    </div>
+
+    <div class="mt-8 flex flex-col sm:flex-row gap-3">
+      <button onclick="generateAndDownload()" class="btn-primary text-white px-6 py-3 rounded-lg font-semibold flex-1">⬇️ Сгенерировать и скачать HTML</button>
+      <button onclick="previewHTML()" class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-6 py-3 rounded-lg font-semibold">👁 Предпросмотр</button>
+    </div>
+  </section>
+
+  <section class="card p-6 scroll-area">
+    <h2 class="text-xl font-bold mb-4 text-gray-800">👁 Предпросмотр результата</h2>
+    <div id="previewBox" class="preview-frame p-4 min-h-[400px] text-sm text-gray-500 flex items-center justify-center">
+      Заполните форму и нажмите «Предпросмотр»
+    </div>
+  </section>
+</main>
+
+<div id="iconModal" class="icon-modal" onclick="if(event.target===this)closeIconModal()">
+  <div class="icon-modal-content">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+      <h3 style="font-weight:700; font-size:1.1rem; color:#1f2937;">Выберите иконку</h3>
+      <button onclick="closeIconModal()" style="background:transparent; border:none; font-size:1.3rem; cursor:pointer; color:#6b7280;">✕</button>
+    </div>
+    <input type="text" id="iconSearch" placeholder="Поиск иконки..." oninput="filterIcons()" style="width:100%; border:1px solid #e5e7eb; border-radius:8px; padding:8px 12px; font-size:13px;">
+    <div id="iconGrid" class="icon-grid"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast">
+  <i class="fas fa-check-circle"></i>
+  <span id="toastMessage">Сообщение</span>
+</div>
+
+<footer class="text-center py-6 text-gray-500 text-sm">
+  Конструктор ЭОМК • Автономный HTML-документ для педагога
+</footer>
+
+<script>
+const THEMES = {
+  cyber: { name: 'Cyber Blue', colors: ['#38bdf8', '#818cf8', '#f472b6'], vars: { '--primary': '#38bdf8', '--primary2': '#7dd3fc', '--primary-dark': '#0284c7', '--accent': '#818cf8', '--accent-pink': '#f472b6', '--bg-dark2': 'rgba(56, 189, 248, 0.3)' } },
+  purple: { name: 'Purple Magic', colors: ['#a78bfa', '#ec4899', '#f59e0b'], vars: { '--primary': '#a78bfa', '--primary2': '#c4b5fd', '--primary-dark': '#7c3aed', '--accent': '#ec4899', '--accent-pink': '#f472b6', '--bg-dark2': 'rgba(167, 139, 250, 0.3)' } },
+  emerald: { name: 'Emerald Night', colors: ['#34d399', '#06b6d4', '#8b5cf6'], vars: { '--primary': '#34d399', '--primary2': '#6ee7b7', '--primary-dark': '#059669', '--accent': '#06b6d4', '--accent-pink': '#8b5cf6', '--bg-dark2': 'rgba(52, 211, 153, 0.3)' } },
+  sunset: { name: 'Sunset Glow', colors: ['#f97316', '#ec4899', '#fbbf24'], vars: { '--primary': '#f97316', '--primary2': '#fdba74', '--primary-dark': '#c2410c', '--accent': '#ec4899', '--accent-pink': '#f472b6', '--bg-dark2': 'rgba(249, 115, 22, 0.3)' } },
+  rose: { name: 'Rose Gold', colors: ['#fb7185', '#f472b6', '#fbbf24'], vars: { '--primary': '#fb7185', '--primary2': '#fda4af', '--primary-dark': '#be123c', '--accent': '#f472b6', '--accent-pink': '#fbbf24', '--bg-dark2': 'rgba(251, 113, 133, 0.3)' } },
+  arctic: { name: 'Arctic', colors: ['#06b6d4', '#3b82f6', '#8b5cf6'], vars: { '--primary': '#06b6d4', '--primary2': '#67e8f9', '--primary-dark': '#0891b2', '--accent': '#3b82f6', '--accent-pink': '#8b5cf6', '--bg-dark2': 'rgba(6, 182, 212, 0.3)' } },
+  neon: { name: 'Neon', colors: ['#0bf5ee', '#a544ef', '#f472b6'], vars: { '--primary': '#0bf5ee', '--primary2': '#67e8f9', '--primary-dark': '#0891b2', '--accent': '#a544ef', '--accent-pink': '#f472b6', '--bg-dark2': 'rgba(11, 245, 238, 0.3)' } },
+  gold: { name: 'Royal Gold', colors: ['#fbbf24', '#f59e0b', '#ef4444'], vars: { '--primary': '#fbbf24', '--primary2': '#fde68a', '--primary-dark': '#d97706', '--accent': '#f59e0b', '--accent-pink': '#ef4444', '--bg-dark2': 'rgba(251, 191, 36, 0.3)' } }
+};
+
+let selectedTheme = 'cyber';
+
+const DEFAULT_FILE_TYPES = [
+  { key: 'pdf',       label: 'Конспект',                icon: 'fas fa-file-pdf',     btnClass: 'btn-pdf',    builtIn: true },
+  { key: 'extra',     label: 'Дополнительный материал', icon: 'fas fa-link',         btnClass: 'btn-extra',  builtIn: true },
+  { key: 'practice',  label: 'Практическая работа',     icon: 'fas fa-laptop-code',  btnClass: 'btn-extra',  builtIn: true },
+  { key: 'test',      label: 'Проверка знаний',         icon: 'fas fa-star',         btnClass: 'btn-final',  builtIn: true },
+  { key: 'reference', label: 'Референс',                icon: 'fas fa-image',        btnClass: 'btn-final',  builtIn: true },
+  { key: 'source',    label: 'Исходник',                icon: 'fas fa-code',         btnClass: 'btn-final',  builtIn: true }
+];
+
+let enabledCategories = new Set(DEFAULT_FILE_TYPES.map(f => f.key));
+let customCategories = [];
+
+try {
+  const savedEnabled = localStorage.getItem('emk_enabledCategories');
+  if (savedEnabled) enabledCategories = new Set(JSON.parse(savedEnabled));
+  const savedCustom = localStorage.getItem('emk_customCategories');
+  if (savedCustom) customCategories = JSON.parse(savedCustom);
+} catch(e) {}
+
+function saveCategoriesState() {
+  try {
+    localStorage.setItem('emk_enabledCategories', JSON.stringify([...enabledCategories]));
+    localStorage.setItem('emk_customCategories', JSON.stringify(customCategories));
+  } catch(e) {}
+}
+
+function getAllCategories() { return [...DEFAULT_FILE_TYPES, ...customCategories]; }
+function getEnabledCategories() { return getAllCategories().filter(c => enabledCategories.has(c.key)); }
+
+const ICON_OPTIONS = [
+  'fas fa-file-pdf','fas fa-file-word','fas fa-file-excel','fas fa-file-powerpoint',
+  'fas fa-file-archive','fas fa-file-audio','fas fa-file-video','fas fa-file-image',
+  'fas fa-file-code','fas fa-file-alt','fas fa-link','fas fa-external-link-alt',
+  'fas fa-globe','fas fa-book','fas fa-book-open','fas fa-bookmark',
+  'fas fa-graduation-cap','fas fa-chalkboard-teacher','fas fa-school',
+  'fas fa-laptop-code','fas fa-desktop','fas fa-mobile-alt','fas fa-tablet-alt',
+  'fas fa-code','fas fa-terminal','fas fa-bug','fas fa-database',
+  'fas fa-star','fas fa-heart','fas fa-trophy','fas fa-medal','fas fa-award',
+  'fas fa-check-circle','fas fa-check-square','fas fa-clipboard-check',
+  'fas fa-image','fas fa-images','fas fa-camera','fas fa-palette',
+  'fas fa-music','fas fa-play-circle','fas fa-video','fas fa-podcast',
+  'fas fa-pen','fas fa-pencil-alt','fas fa-edit','fas fa-marker',
+  'fas fa-lightbulb','fas fa-rocket','fas fa-bolt','fas fa-fire',
+  'fas fa-cog','fas fa-tools','fas fa-wrench','fas fa-hammer',
+  'fas fa-users','fas fa-user','fas fa-user-graduate','fas fa-user-tie',
+  'fas fa-chart-bar','fas fa-chart-line','fas fa-chart-pie',
+  'fas fa-map','fas fa-map-marker-alt','fas fa-compass',
+  'fas fa-flask','fas fa-microscope','fas fa-atom',
+  'fas fa-calculator','fas fa-ruler','fas fa-shapes',
+  'fas fa-puzzle-piece','fas fa-gamepad','fas fa-dice',
+  'fas fa-envelope','fas fa-paper-plane','fas fa-inbox',
+  'fas fa-folder','fas fa-folder-open','fas fa-archive',
+  'fas fa-download','fas fa-upload','fas fa-share-alt',
+  'fas fa-print','fas fa-qrcode','fas fa-barcode',
+  'fas fa-clock','fas fa-calendar','fas fa-calendar-alt',
+  'fas fa-bell','fas fa-flag','fas fa-tag','fas fa-tags',
+  'fas fa-comment','fas fa-comments','fas fa-quote-right',
+  'fas fa-search','fas fa-filter','fas fa-sort',
+  'fas fa-shield-alt','fas fa-lock','fas fa-key',
+  'fas fa-cloud','fas fa-cloud-download-alt','fas fa-cloud-upload-alt',
+  'fas fa-home','fas fa-building','fas fa-store',
+  'fas fa-shopping-cart','fas fa-credit-card','fas fa-money-bill',
+  'fas fa-gift','fas fa-birthday-cake','fas fa-coffee',
+  'fab fa-html5','fab fa-css3-alt','fab fa-js','fab fa-python',
+  'fab fa-react','fab fa-vuejs','fab fa-angular','fab fa-node',
+  'fab fa-github','fab fa-git-alt','fab fa-youtube','fab fa-google',
+  'fab fa-figma','fab fa-sketch','fab fa-dribbble',
+  'fas fa-paw','fas fa-tree','fas fa-leaf','fas fa-seedling'
+];
+
+let selectedNewIcon = 'fas fa-star';
+
+function showToast(message, type = 'success') {
+  const toast = document.getElementById('toast');
+  const msgEl = document.getElementById('toastMessage');
+  const icon = toast.querySelector('i');
+  toast.classList.remove('success', 'error', 'info');
+  toast.classList.add(type);
+  const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
+  icon.className = 'fas ' + (icons[type] || icons.success);
+  msgEl.textContent = message;
+  toast.classList.add('show');
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => toast.classList.remove('show'), 4000);
+}
+
+function renderCategoriesList() {
+  const list = document.getElementById('categoriesList');
+  list.innerHTML = '';
+  getAllCategories().forEach(cat => {
+    const isEnabled = enabledCategories.has(cat.key);
+    const item = document.createElement('div');
+    item.className = 'category-item' + (isEnabled ? '' : ' disabled');
+    item.innerHTML = `
+      <input type="checkbox" class="category-checkbox" ${isEnabled ? 'checked' : ''} 
+        onchange="toggleCategory('${cat.key}', this.checked)">
+      <div class="category-info">
+        <div class="category-icon"><i class="${cat.icon}"></i></div>
+        <div class="category-label" title="${escapeAttr(cat.label)}">${escapeHtml(cat.label)}</div>
+        ${cat.builtIn ? '<span class="category-badge">базовая</span>' : '<span class="category-badge" style="background:#fef3c7;color:#92400e;">своя</span>'}
+      </div>
+      ${!cat.builtIn ? `<button class="category-delete" onclick="deleteCustomCategory('${cat.key}')" title="Удалить"><i class="fas fa-trash"></i></button>` : ''}
+    `;
+    list.appendChild(item);
+  });
+  updateStats();
+}
+
+function toggleCategory(key, enabled) {
+  if (enabled) enabledCategories.add(key); else enabledCategories.delete(key);
+  saveCategoriesState(); renderCategoriesList(); renderTopics();
+}
+
+function enableAllCategories() {
+  getAllCategories().forEach(c => enabledCategories.add(c.key));
+  saveCategoriesState(); renderCategoriesList(); renderTopics();
+}
+
+function disableAllCategories() {
+  enabledCategories.clear();
+  saveCategoriesState(); renderCategoriesList(); renderTopics();
+}
+
+function deleteCustomCategory(key) {
+  if (!confirm('Удалить эту категорию?')) return;
+  customCategories = customCategories.filter(c => c.key !== key);
+  enabledCategories.delete(key);
+  saveCategoriesState(); renderCategoriesList(); renderTopics();
+}
+
+function addCustomCategory() {
+  const nameInput = document.getElementById('newCategoryName');
+  const name = nameInput.value.trim();
+  if (!name) { alert('Введите название категории'); return; }
+  const btnClass = document.getElementById('newCategoryBtnClass').value;
+  const key = 'custom_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+  customCategories.push({ key, label: name, icon: selectedNewIcon, btnClass, builtIn: false });
+  enabledCategories.add(key);
+  saveCategoriesState();
+  nameInput.value = '';
+  selectedNewIcon = 'fas fa-star';
+  document.getElementById('newCategoryIconPreview').className = selectedNewIcon;
+  renderCategoriesList(); renderTopics();
+  showToast(`Категория «${name}» добавлена`, 'success');
+}
+
+function openIconModal() { document.getElementById('iconModal').classList.add('open'); renderIconGrid(); }
+function closeIconModal() { document.getElementById('iconModal').classList.remove('open'); }
+
+function renderIconGrid(filter = '') {
+  const grid = document.getElementById('iconGrid');
+  grid.innerHTML = '';
+  const filtered = filter ? ICON_OPTIONS.filter(i => i.toLowerCase().includes(filter.toLowerCase())) : ICON_OPTIONS;
+  filtered.forEach(iconClass => {
+    const opt = document.createElement('div');
+    opt.className = 'icon-option' + (selectedNewIcon === iconClass ? ' selected' : '');
+    opt.innerHTML = `<i class="${iconClass}"></i>`;
+    opt.onclick = () => {
+      selectedNewIcon = iconClass;
+      document.getElementById('newCategoryIconPreview').className = iconClass;
+      renderIconGrid(document.getElementById('iconSearch').value);
+    };
+    grid.appendChild(opt);
+  });
+}
+
+function filterIcons() { renderIconGrid(document.getElementById('iconSearch').value); }
+
+function updateStats() {
+  const block = document.getElementById('statsBlock');
+  const total = getAllCategories().length;
+  const enabled = enabledCategories.size;
+  const custom = customCategories.length;
+  const totalMaterials = topics.reduce((sum, t) => sum + t.files.length, 0);
+  block.innerHTML = `
+    <div>📊 Всего категорий: <b>${total}</b></div>
+    <div>✅ Включено: <b>${enabled}</b></div>
+    <div>✏️ Своих: <b>${custom}</b></div>
+    <div>📚 Тем курса: <b>${topics.length}</b></div>
+    <div>📎 Материалов: <b>${totalMaterials}</b></div>
+  `;
+}
+
+let topics = [];
+let topicIdCounter = 0;
+let collapsedTopics = new Set();
+
+function uid() { return 'm_' + Math.random().toString(36).slice(2, 10); }
+
+function toggleCollapsible(sectionId, headerEl) {
+  document.getElementById(sectionId).classList.toggle('collapsed');
+  headerEl.classList.toggle('collapsed');
+}
+
+function toggleTopic(topicId, event) {
+  event.stopPropagation();
+  if (collapsedTopics.has(topicId)) collapsedTopics.delete(topicId);
+  else collapsedTopics.add(topicId);
+  const body = document.querySelector(`[data-topic-body="${topicId}"]`);
+  const icon = document.querySelector(`[data-topic-icon="${topicId}"]`);
+  if (body) body.classList.toggle('collapsed');
+  if (icon) {
+    icon.classList.remove('fa-chevron-down', 'fa-chevron-right');
+    icon.classList.add(collapsedTopics.has(topicId) ? 'fa-chevron-right' : 'fa-chevron-down');
+  }
+}
+
+function renderThemePicker() {
+  const picker = document.getElementById('themePicker');
+  picker.innerHTML = '';
+  Object.entries(THEMES).forEach(([key, theme]) => {
+    const card = document.createElement('div');
+    card.className = 'theme-card-pick' + (selectedTheme === key ? ' selected' : '');
+    card.onclick = () => { selectedTheme = key; renderThemePicker(); };
+    const [c1, c2] = theme.colors;
+    card.innerHTML = `
+      <div class="preview" style="background: #f3f4f6;">
+        <div class="hero-mini" style="background: linear-gradient(135deg, ${c1} 0%, ${c2} 100%);"></div>
+        <div class="card-mini"></div>
+      </div>
+      <div class="name">${theme.name}</div>
+      <div class="check">✓</div>
+    `;
+    picker.appendChild(card);
+  });
+}
+
+function addTopic(initial = null) {
+  const id = topicIdCounter++;
+  const enabledCats = getEnabledCategories();
+  const defaultType = enabledCats.length > 0 ? enabledCats[0].key : 'pdf';
+  const topic = initial || {
+    id,
+    title: '',
+    files: [{ uid: uid(), type: defaultType, name: '', dataUrl: null, mode: 'file', linkUrl: '' }]
+  };
+  topic.id = id;
+  topics.push(topic);
+  renderTopics();
+  setTimeout(() => {
+    const el = document.querySelector(`[data-topic-id="${id}"]`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 100);
+}
+
+function removeTopic(id) {
+  topics = topics.filter(t => t.id !== id);
+  collapsedTopics.delete(id);
+  renderTopics();
+}
+
+function toggleAddMaterialList(topicId, event) {
+  event.stopPropagation();
+  event.preventDefault();
+  document.querySelectorAll('.add-material-list.open').forEach(list => {
+    if (list.getAttribute('data-for-topic') !== String(topicId)) list.classList.remove('open');
+  });
+  const list = document.querySelector(`.add-material-list[data-for-topic="${topicId}"]`);
+  if (list) list.classList.toggle('open');
+}
+
+function addMaterialToTopic(topicId, typeKey, event) {
+  event.stopPropagation();
+  event.preventDefault();
+  const t = topics.find(x => x.id === topicId);
+  if (!t) return;
+  t.files.push({ uid: uid(), type: typeKey, name: '', dataUrl: null, mode: 'file', linkUrl: '' });
+  const list = document.querySelector(`.add-material-list[data-for-topic="${topicId}"]`);
+  if (list) list.classList.remove('open');
+  renderTopics();
+}
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.add-material-wrap')) {
+    document.querySelectorAll('.add-material-list.open').forEach(list => list.classList.remove('open'));
+  }
+});
+
+function removeMaterial(topicId, materialUid) {
+  const t = topics.find(x => x.id === topicId);
+  if (!t) return;
+  t.files = t.files.filter(f => f.uid !== materialUid);
+  renderTopics();
+}
+
+function updateTopicTitle(id, value) { const t = topics.find(t => t.id === id); if (t) t.title = value; }
+function updateMaterialName(topicId, materialUid, value) {
+  const t = topics.find(x => x.id === topicId); if (!t) return;
+  const m = t.files.find(f => f.uid === materialUid); if (m) m.name = value;
+}
+function changeMaterialType(topicId, materialUid, newType) {
+  const t = topics.find(x => x.id === topicId); if (!t) return;
+  const m = t.files.find(f => f.uid === materialUid); if (m) m.type = newType;
+}
+function changeMaterialMode(topicId, materialUid, newMode) {
+  const t = topics.find(x => x.id === topicId); if (!t) return;
+  const m = t.files.find(f => f.uid === materialUid); if (m) m.mode = newMode;
+  renderTopics();
+}
+function updateMaterialLink(topicId, materialUid, value) {
+  const t = topics.find(x => x.id === topicId); if (!t) return;
+  const m = t.files.find(f => f.uid === materialUid); if (m) m.linkUrl = value;
+}
+
+function attachFile(topicId, materialUid, input) {
+  const file = input.files[0]; if (!file) return;
+  const t = topics.find(x => x.id === topicId); if (!t) return;
+  const m = t.files.find(f => f.uid === materialUid); if (!m) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    m.dataUrl = e.target.result;
+    m.dataFileName = file.name;
+    m.dataFileType = file.type;
+    if (!m.name) m.name = file.name;
+    renderTopics();
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearFile(topicId, materialUid) {
+  const t = topics.find(x => x.id === topicId); if (!t) return;
+  const m = t.files.find(f => f.uid === materialUid);
+  if (m) { m.dataUrl = null; m.dataFileName = null; m.dataFileType = null; }
+  renderTopics();
+}
+
+function renderTopics() {
+  const container = document.getElementById('topicsContainer');
+  container.innerHTML = '';
+  const enabledCats = getEnabledCategories();
+  
+  topics.forEach((topic, idx) => {
+    const isCollapsed = collapsedTopics.has(topic.id);
+    const div = document.createElement('div');
+    div.className = 'topic-card bg-gray-50 rounded-lg p-4';
+    div.setAttribute('data-topic-id', topic.id);
+
+    const materialsHtml = topic.files.map(m => {
+      const hasFile = !!m.dataUrl;
+      const hasLink = !!m.linkUrl;
+      const isLinkMode = m.mode === 'link';
+
+      const sourceBlock = isLinkMode
+        ? `<input type="url" placeholder="https://..." value="${escapeAttr(m.linkUrl)}"
+            oninput="updateMaterialLink(${topic.id}, '${m.uid}', this.value)"
+            class="flex-1 min-w-[180px] border border-gray-200 rounded-lg px-2 py-1 text-sm">
+           ${hasLink ? `<span class="file-chip">🔗 ссылка</span>` : ''}`
+        : `<label class="cursor-pointer inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 px-2 py-1 rounded-md hover:bg-indigo-50">
+            📎 Файл
+            <input type="file" class="file-input-hidden" onchange="attachFile(${topic.id}, '${m.uid}', this)">
+          </label>
+          ${hasFile ? `<span class="file-chip">✓ ${escapeHtml((m.dataFileName || 'файл').length > 20 ? m.dataFileName.substring(0, 17) + '...' : (m.dataFileName || 'загружен'))}</span>
+            <button onclick="clearFile(${topic.id}, '${m.uid}')" class="text-xs text-gray-500 hover:text-gray-700" title="Открепить файл">✕</button>` : ''}`;
+
+      return `
+        <div class="material-row">
+          <select onchange="changeMaterialType(${topic.id}, '${m.uid}', this.value)"
+            class="border border-gray-200 rounded-lg px-2 py-1 text-sm bg-white">
+            ${enabledCats.map(c => `<option value="${c.key}" ${c.key === m.type ? 'selected' : ''}>${c.label}</option>`).join('')}
+          </select>
+          <input type="text" placeholder="Название / подпись" value="${escapeAttr(m.name)}"
+            oninput="updateMaterialName(${topic.id}, '${m.uid}', this.value)"
+            class="flex-1 min-w-[140px] border border-gray-200 rounded-lg px-2 py-1 text-sm">
+          <div class="mode-toggle">
+            <button class="${!isLinkMode ? 'active' : ''}" onclick="changeMaterialMode(${topic.id}, '${m.uid}', 'file')" title="Прикрепить файл">📎</button>
+            <button class="${isLinkMode ? 'active' : ''}" onclick="changeMaterialMode(${topic.id}, '${m.uid}', 'link')" title="Добавить ссылку">🔗</button>
+          </div>
+          ${sourceBlock}
+          <button onclick="removeMaterial(${topic.id}, '${m.uid}')" class="text-red-500 hover:text-red-700 text-sm ml-auto" title="Удалить материал">🗑</button>
+        </div>
+      `;
+    }).join('');
+
+    const addMaterialButtons = enabledCats.map(c => `
+      <button type="button" onclick="addMaterialToTopic(${topic.id}, '${c.key}', event)">
+        <i class="${c.icon}"></i><span>${escapeHtml(c.label)}</span>
+      </button>
+    `).join('');
+
+    div.innerHTML = `
+      <div class="topic-header flex items-center justify-between mb-3" onclick="toggleTopic(${topic.id}, event)">
+        <h3 class="font-semibold text-gray-700 flex items-center gap-2">
+          <i class="fas fa-chevron-${isCollapsed ? 'right' : 'down'} text-xs text-gray-500" data-topic-icon="${topic.id}"></i>
+          Тема ${idx + 1}${topic.title ? ': ' + escapeHtml(topic.title.substring(0, 40)) : ''}
+        </h3>
+        <button onclick="event.stopPropagation(); removeTopic(${topic.id})" class="text-red-500 hover:text-red-700 text-sm">✕ Удалить</button>
+      </div>
+      <div class="topic-body ${isCollapsed ? 'collapsed' : ''}" data-topic-body="${topic.id}">
+        <input type="text" placeholder="Название темы" value="${escapeAttr(topic.title)}"
+          onchange="updateTopicTitle(${topic.id}, this.value)"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3 bg-white">
+        <div class="space-y-2 mb-3">
+          ${materialsHtml || '<div class="text-sm text-gray-400 italic">Нет материалов</div>'}
+        </div>
+        ${enabledCats.length > 0 ? `
+          <div class="add-material-wrap">
+            <button type="button" class="add-material-btn" onclick="toggleAddMaterialList(${topic.id}, event)">
+              <i class="fas fa-plus"></i> Добавить материал
+            </button>
+            <div class="add-material-list" data-for-topic="${topic.id}">
+              ${addMaterialButtons}
+            </div>
+          </div>
+        ` : '<div class="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-lg p-3"><i class="fas fa-exclamation-triangle"></i> Включите хотя бы одну категорию в боковой панели</div>'}
+      </div>
+    `;
+    container.appendChild(div);
+  });
+  updateStats();
+}
+
+function escapeAttr(s) { return (s || '').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+function escapeHtml(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+function getMaterialHref(m) {
+  if (m.mode === 'link' && m.linkUrl) return m.linkUrl;
+  if (m.mode === 'file' && m.dataUrl) return m.dataUrl;
+  return null;
+}
+
+// ============ ЗАГРУЗКА РАНЕЕ СОЗДАННОГО HTML ============
+function loadExistingHTML() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.html,.htm,text/html';
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      showToast('Чтение файла...', 'info');
+      const text = await file.text();
+      const result = parseHTMLDocument(text);
+      if (!result.success) { showToast('Ошибка: ' + result.error, 'error'); return; }
+      applyParsedData(result.data);
+      const fileCount = result.data.topics.reduce((s,t)=>s+t.files.filter(f=>f.dataUrl).length,0);
+      showToast(`Документ загружен! Тем: ${result.data.topics.length}, файлов: ${fileCount}`, 'success');
+    } catch(err) {
+      console.error(err);
+      showToast('Ошибка загрузки: ' + err.message, 'error');
+    }
+  };
+  input.click();
+}
+
+function parseHTMLDocument(htmlString) {
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlString, 'text/html');
+    
+    const detectedTheme = detectThemeFromCSS(htmlString);
+    const dataUrlMap = extractDataUrlsFromJS(htmlString);
+    console.log('Извлечено data URL файлов:', Object.keys(dataUrlMap).length);
+    
+    const heroText = doc.querySelector('.hero-text');
+    let teacher = '', department = '', org = '', course = '', subtitle = '';
+    
+    if (heroText) {
+      const badge = doc.querySelector('.badge');
+      if (badge) {
+        teacher = badge.textContent.replace(/\s+/g, ' ').trim();
+        teacher = teacher.replace(/^[^\wа-яА-ЯёЁ]+/, '').trim();
+        teacher = toTitleCase(teacher.toLowerCase());
+      }
+      
+      const h1gr1 = heroText.querySelector('h1.gr1');
+      if (h1gr1) {
+        const parts = h1gr1.innerHTML.split(/<br\s*\/?>/i);
+        if (parts.length >= 2) department = stripTags(parts[1]).trim();
+        if (parts.length >= 3) {
+          const spanText = stripTags(parts[2]).replace(/^\|\s*/, '').trim();
+          if (spanText) org = spanText;
+        }
+      }
+      
+      const h1gr2 = heroText.querySelector('h1.gr2');
+      if (h1gr2) course = stripTags(h1gr2.innerHTML).trim();
+      
+      const p = heroText.querySelector('p');
+      if (p) subtitle = stripTags(p.innerHTML).replace(/^\|\s*/, '').trim();
+    }
+    
+    const themeCards = doc.querySelectorAll('.themes-grid .theme-card');
+    const parsedTopics = [];
+    
+    themeCards.forEach((card, idx) => {
+      const titleEl = card.querySelector('.theme-title');
+      const title = titleEl ? titleEl.textContent.trim() : `Тема ${idx + 1}`;
+      
+      const files = [];
+      const buttons = card.querySelectorAll('.material-block .btn');
+      
+      buttons.forEach(btn => {
+        const href = btn.getAttribute('href') || '';
+        const fileId = btn.getAttribute('data-file-id') || '';
+        const iconEl = btn.querySelector('i');
+        const iconClass = iconEl ? iconEl.className : '';
+        const label = btn.textContent.trim();
+        
+        const category = detectCategoryFromButton(btn, iconClass);
+        
+        const fileObj = {
+          uid: uid(),
+          type: category.key,
+          name: label,
+          dataUrl: null,
+          mode: 'link',
+          linkUrl: ''
+        };
+        
+        // 1. Если есть data-file-id, ищем в карте
+        if (fileId && dataUrlMap[fileId]) {
+          fileObj.mode = 'file';
+          fileObj.dataUrl = dataUrlMap[fileId].dataUrl;
+          fileObj.dataFileName = dataUrlMap[fileId].fileName || label;
+          fileObj.dataFileType = dataUrlMap[fileId].fileType || '';
+        }
+        // 2. Прямой data URL в href
+        else if (href.startsWith('data:')) {
+          fileObj.mode = 'file';
+          fileObj.dataUrl = href;
+          fileObj.dataFileName = label;
+          const mimeMatch = href.match(/^data:([^;,]+)/);
+          if (mimeMatch) fileObj.dataFileType = mimeMatch[1];
+        }
+        // 3. Внешняя ссылка
+        else if (href.startsWith('http://') || href.startsWith('https://')) {
+          fileObj.mode = 'link';
+          fileObj.linkUrl = href;
+        }
+        // 4. Другая ссылка
+        else if (href && href !== '#') {
+          fileObj.mode = 'link';
+          fileObj.linkUrl = href;
+        }
+        
+        files.push(fileObj);
+      });
+      
+      parsedTopics.push({ id: topicIdCounter++, title, files });
+    });
+    
+    const detectedCustomCategories = [];
+    parsedTopics.forEach(t => {
+      t.files.forEach(f => {
+        const existing = getAllCategories().find(c => c.key === f.type);
+        if (!existing) {
+          detectedCustomCategories.push({
+            key: f.type, label: f.name, icon: 'fas fa-file-alt',
+            btnClass: 'btn-final', builtIn: false
+          });
+        }
+      });
+    });
+    
+    return {
+      success: true,
+      data: { theme: detectedTheme, teacher, department, org, course, subtitle, topics: parsedTopics, customCategories: detectedCustomCategories }
+    };
+  } catch(err) {
+    console.error('Ошибка парсинга:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+// ============ НАДЁЖНОЕ ИЗВЛЕЧЕНИЕ DATA URL ИЗ JS ============
+function extractDataUrlsFromJS(htmlString) {
+  const map = {};
+  
+  try {
+    // Ищем начало массива файлов
+    const startMarker = 'const files = ';
+    const startIdx = htmlString.indexOf(startMarker);
+    if (startIdx === -1) {
+      console.log('Маркер "const files = " не найден');
+      return map;
+    }
+    
+    // Находим начало массива '['
+    const arrStart = htmlString.indexOf('[', startIdx);
+    if (arrStart === -1) return map;
+    
+    // Находим конец массива - ищем сбалансированные скобки
+    let depth = 0;
+    let arrEnd = -1;
+    let inString = false;
+    let stringChar = '';
+    
+    for (let i = arrStart; i < htmlString.length; i++) {
+      const ch = htmlString[i];
+      const prev = i > 0 ? htmlString[i-1] : '';
+      
+      if (inString) {
+        if (ch === stringChar && prev !== '\\') inString = false;
+      } else {
+        if (ch === '"' || ch === "'" || ch === '`') {
+          inString = true;
+          stringChar = ch;
+        } else if (ch === '[') {
+          depth++;
+        } else if (ch === ']') {
+          depth--;
+          if (depth === 0) {
+            arrEnd = i;
+            break;
+          }
+        }
+      }
+    }
+    
+    if (arrEnd === -1) {
+      console.log('Конец массива не найден');
+      return map;
+    }
+    
+    const filesStr = htmlString.substring(arrStart, arrEnd + 1);
+    console.log('Длина строки файлов:', filesStr.length);
+    
+    // Пробуем JSON.parse
+    try {
+      const filesArray = JSON.parse(filesStr);
+      console.log('JSON успешно распарсен, файлов:', filesArray.length);
+      filesArray.forEach(f => {
+        if (f.id && f.dataUrl) {
+          map[f.id] = {
+            dataUrl: f.dataUrl,
+            fileName: f.fileName || '',
+            fileType: f.fileType || ''
+          };
+        }
+      });
+    } catch(e) {
+      console.warn('JSON.parse не сработал, используем regex:', e.message);
+      // Fallback: ищем каждый файл отдельно через regex
+      // Формат: {"id":"file_0","dataUrl":"...","fileName":"...","fileType":"..."}
+      const fileRegex = /\{\s*"id"\s*:\s*"([^"]+)"\s*,\s*"dataUrl"\s*:\s*"((?:[^"\\]|\\.)*)"\s*,\s*"fileName"\s*:\s*"((?:[^"\\]|\\.)*)"\s*,\s*"fileType"\s*:\s*"((?:[^"\\]|\\.)*)"\s*\}/g;
+      let match;
+      let count = 0;
+      while ((match = fileRegex.exec(filesStr)) !== null) {
+        map[match[1]] = {
+          dataUrl: match[2].replace(/\\"/g, '"').replace(/\\\\/g, '\\'),
+          fileName: match[3].replace(/\\"/g, '"').replace(/\\\\/g, '\\'),
+          fileType: match[4].replace(/\\"/g, '"').replace(/\\\\/g, '\\')
+        };
+        count++;
+      }
+      console.log('Regex нашёл файлов:', count);
+    }
+  } catch(e) {
+    console.error('Критическая ошибка extractDataUrlsFromJS:', e);
+  }
+  
+  return map;
+}
+
+function detectThemeFromCSS(htmlString) {
+  const rootMatch = htmlString.match(/:root\s*\{([^}]+)\}/);
+  if (!rootMatch) return 'cyber';
+  const rootBlock = rootMatch[1];
+  const vars = {};
+  const varMatches = rootBlock.matchAll(/(--[\w-]+)\s*:\s*([^;]+);/g);
+  for (const m of varMatches) vars[m[1]] = m[2].trim();
+  
+  let bestMatch = 'cyber', bestScore = 0;
+  Object.entries(THEMES).forEach(([key, theme]) => {
+    let score = 0;
+    if (vars['--primary'] === theme.vars['--primary']) score += 3;
+    if (vars['--accent'] === theme.vars['--accent']) score += 2;
+    if (vars['--accent-pink'] === theme.vars['--accent-pink']) score += 1;
+    if (score > bestScore) { bestScore = score; bestMatch = key; }
+  });
+  return bestMatch;
+}
+
+function detectCategoryFromButton(btn, iconClass) {
+  const btnClasses = Array.from(btn.classList);
+  const byIcon = getAllCategories().find(c => iconClass.includes(c.icon.replace('fas ', '').replace('fab ', '')) || c.icon === iconClass);
+  if (byIcon) return byIcon;
+  
+  if (btnClasses.includes('btn-pdf')) return getAllCategories().find(c => c.btnClass === 'btn-pdf') || DEFAULT_FILE_TYPES[0];
+  
+  const text = btn.textContent.toLowerCase();
+  if (text.includes('конспект') || text.includes('pdf')) return getAllCategories().find(c => c.key === 'pdf') || DEFAULT_FILE_TYPES[0];
+  if (text.includes('дополнительный')) return getAllCategories().find(c => c.key === 'extra') || DEFAULT_FILE_TYPES[1];
+  if (text.includes('практич')) return getAllCategories().find(c => c.key === 'practice') || DEFAULT_FILE_TYPES[2];
+  if (text.includes('проверк') || text.includes('тест')) return getAllCategories().find(c => c.key === 'test') || DEFAULT_FILE_TYPES[3];
+  if (text.includes('референс')) return getAllCategories().find(c => c.key === 'reference') || DEFAULT_FILE_TYPES[4];
+  if (text.includes('исходник')) return getAllCategories().find(c => c.key === 'source') || DEFAULT_FILE_TYPES[5];
+  
+  if (btnClasses.includes('btn-extra')) return getAllCategories().find(c => c.btnClass === 'btn-extra') || DEFAULT_FILE_TYPES[1];
+  if (btnClasses.includes('btn-final')) return getAllCategories().find(c => c.btnClass === 'btn-final') || DEFAULT_FILE_TYPES[3];
+  
+  return DEFAULT_FILE_TYPES[0];
+}
+
+function stripTags(html) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || '';
+}
+
+function toTitleCase(str) {
+  return str.replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function applyParsedData(data) {
+  if (data.theme && THEMES[data.theme]) selectedTheme = data.theme;
+  
+  if (data.teacher) document.getElementById('teacherName').value = data.teacher;
+  if (data.org) document.getElementById('orgName').value = data.org;
+  if (data.department) document.getElementById('department').value = data.department;
+  if (data.course) document.getElementById('courseName').value = data.course;
+  if (data.subtitle) document.getElementById('courseSubtitle').value = data.subtitle;
+  
+  if (data.customCategories && data.customCategories.length > 0) {
+    data.customCategories.forEach(cat => {
+      if (!getAllCategories().find(c => c.key === cat.key)) {
+        customCategories.push(cat);
+        enabledCategories.add(cat.key);
+      }
+    });
+    saveCategoriesState();
+    renderCategoriesList();
+  }
+  
+  topics = data.topics || [];
+  topicIdCounter = topics.length;
+  collapsedTopics.clear();
+  
+  topics.forEach(t => {
+    t.files.forEach(f => { enabledCategories.add(f.type); });
+  });
+  saveCategoriesState();
+  
+  renderThemePicker();
+  renderCategoriesList();
+  renderTopics();
+}
+
+const ORIGINAL_CSS = `
+  :root { --bg-dark: #020617; --glass-bg: rgba(15, 23, 42, 0.6); --glass-border: rgba(255, 255, 255, 0.08); --glass-hover: rgba(56, 189, 248, 0.15); --text-main: #f1f5f9; --text-muted: #94a3b8; --card-bg: rgba(15, 23, 42, 0.6); --shadow-color: rgba(0, 0, 0, 0.5); }
+  [data-theme="light"] { --bg-dark: #f8fafc; --glass-bg: rgba(255, 255, 255, 0.7); --glass-border: rgba(15, 23, 42, 0.20); --glass-hover: rgba(56, 189, 248, 0.1); --text-main: #0f172a; --text-muted: #64748b; --card-bg: rgba(255, 255, 255, 0.85); --shadow-color: rgba(15, 23, 42, 0.1); --primary2: #0f172a; --bg-dark2: rgba(56, 189, 248, 0.15); }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Inter', sans-serif; color: var(--text-main); min-height: 100vh; background: var(--bg-dark); position: relative; overflow-x: hidden; transition: background 0.6s ease, color 0.6s ease; }
+  .bg-gradient { position: fixed; inset: 0; background: radial-gradient(ellipse at 20% 0%, rgba(56, 189, 248, 0.15) 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, rgba(129, 140, 248, 0.15) 0%, transparent 50%), radial-gradient(ellipse at 50% 50%, rgba(244, 114, 182, 0.08) 0%, transparent 60%); z-index: -3; }
+  .bg-pattern { position: fixed; inset: 0; background-image: linear-gradient(rgba(91, 35, 88, 0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(91, 35, 88, 0.8) 1px, transparent 1px); background-size: 40px 40px; opacity: 0.4; z-index: -2; pointer-events: none; }
+  [data-theme="light"] .bg-pattern { background-image: linear-gradient(rgba(129, 140, 248, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(129, 140, 248, 0.15) 1px, transparent 1px); opacity: 0.6; }
+  .orb { position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.3; z-index: -1; pointer-events: none; animation: orbFloat 20s ease-in-out infinite; }
+  .orb-1 { width: 400px; height: 400px; background: var(--primary); top: -100px; left: -100px; }
+  .orb-2 { width: 500px; height: 500px; background: var(--accent); bottom: -150px; right: -150px; animation-delay: -7s; }
+  .orb-3 { width: 300px; height: 300px; background: var(--accent-pink); top: 50%; left: 50%; animation-delay: -14s; }
+  [data-theme="light"] .orb { opacity: 0.2; }
+  @keyframes orbFloat { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(50px, -50px) scale(1.1); } 66% { transform: translate(-30px, 30px) scale(0.9); } }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
+  @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+  @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+  .animate-on-scroll { opacity: 0; transform: translateY(40px); transition: opacity 0.8s cubic-bezier(0.2, 0.9, 0.4, 1), transform 0.8s cubic-bezier(0.2, 0.9, 0.4, 1); }
+  .animate-on-scroll.visible { opacity: 1; transform: translateY(0); }
+  .container { max-width: 1300px; margin: 0 auto; padding: 0 2rem; position: relative; z-index: 1; }
+  .theme-toggle { position: fixed; top: 20px; right: 20px; z-index: 1000; width: 60px; height: 60px; border-radius: 50%; background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; transition: all 0.4s; box-shadow: 0 10px 30px var(--shadow-color); }
+  .theme-toggle:hover { transform: translateY(-4px) rotate(15deg) scale(1.05); border-color: var(--primary); }
+  .theme-toggle i { position: absolute; transition: all 0.5s; }
+  .theme-toggle .fa-sun { opacity: 0; transform: rotate(-180deg) scale(0); color: #fbbf24; }
+  .theme-toggle .fa-moon { opacity: 1; transform: rotate(0deg) scale(1); color: var(--primary); }
+  [data-theme="light"] .theme-toggle .fa-sun { opacity: 1; transform: rotate(0deg) scale(1); }
+  [data-theme="light"] .theme-toggle .fa-moon { opacity: 0; transform: rotate(180deg) scale(0); }
+  .hero { padding: 2rem 0 0; margin-bottom: 1.5rem; animation: fadeInUp 1s ease-out; }
+  .hero-content { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 2rem; background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 2rem; padding: 3rem; box-shadow: 0 25px 50px -12px var(--shadow-color); position: relative; overflow: hidden; }
+  .hero-content::before { content: ''; position: absolute; inset: 0; padding: 1px; border-radius: 2rem; background: linear-gradient(135deg, var(--primary), var(--accent), var(--accent-pink), var(--primary)); background-size: 300% 300%; -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: gradientShift 8s ease infinite; pointer-events: none; opacity: 0.5; }
+  .hero-text h1 { font-size: 3rem; font-weight: 800; line-height: 1.1; margin-bottom: 1rem; }
+  .hero-text h1.gr1 { background: linear-gradient(120deg, #ffffff 0%, var(--primary) 20%, var(--accent) 100%); background-size: 200% 200%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: gradientShift 6s ease infinite; }
+  [data-theme="light"] .hero-text h1.gr1 { background: linear-gradient(120deg, #0f172a 0%, var(--primary-dark) 30%, var(--accent) 100%); background-size: 200% 200%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-text h1.gr2 { background: linear-gradient(120deg, #ffffff 0%, var(--accent-pink) 20%, var(--accent) 100%); background-size: 200% 200%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: gradientShift 6s ease infinite; }
+  [data-theme="light"] .hero-text h1.gr2 { background: linear-gradient(120deg, #0f172a 0%, var(--accent-pink) 30%, var(--accent) 100%); background-size: 200% 200%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-text h1 .span { font-size: 1.6rem !important; }
+  .hero-text p { font-size: 1.15rem; color: var(--text-muted); font-weight: 300; }
+  .hero-text p i { color: var(--accent); margin-right: 8px; }
+  .badge { background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 40%, transparent), var(--accent)); backdrop-filter: blur(12px); padding: 1rem 2rem; border-radius: 60px; font-weight: 600; border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent); color: #ffffff; display: flex; align-items: center; gap: 10px; animation: float 4s ease-in-out infinite; position: relative; overflow: hidden; box-shadow: 0 10px 30px -5px color-mix(in srgb, var(--accent) 50%, transparent); }
+  .badge::after { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); animation: shimmer 3s ease-in-out infinite; }
+  .badge i { color: var(--primary2); font-size: 1.2rem; }
+  [data-theme="light"] .badge { color: #ffffff; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+  .dropdown-nav { margin: 1.5rem 0 0.5rem; position: relative; z-index: 50; }
+  .dropdown-nav summary { background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 60px; padding: 0.9rem 2.2rem; font-weight: 600; font-size: 1rem; color: var(--text-main); cursor: pointer; transition: all 0.4s; display: flex; align-items: center; gap: 12px; list-style: none; justify-content: center; }
+  .dropdown-nav summary::-webkit-details-marker { display: none; }
+  .dropdown-nav summary i { color: var(--primary); transition: transform 0.4s; }
+  .dropdown-nav[open] summary i.fa-chevron-down { transform: rotate(180deg); }
+  .dropdown-nav summary:hover { background: var(--glass-hover); border-color: var(--primary); box-shadow: 0 15px 30px -10px color-mix(in srgb, var(--primary) 40%, transparent); transform: translateY(-2px); }
+  .dropdown-menu-wrapper { overflow: hidden; max-height: 0; opacity: 0; transition: max-height 0.5s, opacity 0.4s, transform 0.5s; transform: translateY(-20px); }
+  .dropdown-menu-wrapper.open { max-height: 2000px; opacity: 1; margin-top: 0.8rem; transform: translateY(0); }
+  .dropdown-nav .dropdown-menu { background: var(--glass-bg); backdrop-filter: blur(24px); border: 1px solid var(--glass-border); border-radius: 1.5rem; padding: 1.5rem 2rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 0.6rem 1.5rem; overflow-y: auto; max-height: 550px; box-shadow: 0 25px 50px -12px var(--shadow-color); }
+  .dropdown-menu a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.8rem; border-radius: 30px; transition: all 0.3s; display: flex; align-items: center; gap: 8px; border: 1px solid transparent; }
+  .dropdown-menu a:hover { color: var(--text-main); background: var(--glass-hover); border-color: var(--glass-border); transform: translateX(6px); }
+  .dropdown-menu a .topic-num { color: var(--primary); font-weight: 600; font-size: 0.75rem; background: color-mix(in srgb, var(--primary) 15%, transparent); padding: 0.1rem 0.5rem; border-radius: 20px; border: 1px solid color-mix(in srgb, var(--primary) 60%, transparent); }
+  .section-card { background: var(--glass-bg); backdrop-filter: blur(20px); border-radius: 2rem; margin-bottom: 3.5rem; padding: 2.5rem; border: 1px solid var(--glass-border); box-shadow: 0 25px 50px -12px var(--shadow-color); }
+  .section-title { font-size: 2rem; font-weight: 800; margin-bottom: 2rem; padding-bottom: 0.8rem; border-bottom: 2px solid color-mix(in srgb, var(--primary) 30%, transparent); background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; display: inline-flex; align-items: center; gap: 12px; }
+  .section-title i { -webkit-text-fill-color: initial; color: var(--primary); font-size: 1.8rem; }
+  .themes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 2rem; margin-top: 1rem; }
+  .theme-card { background: var(--card-bg); backdrop-filter: blur(10px); border-radius: 1.5rem; padding: 1.8rem; transition: all 0.4s; border: 1px solid var(--glass-border); position: relative; overflow: hidden; }
+  .theme-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--primary), var(--accent), var(--accent-pink)); background-size: 200% 100%; transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease; }
+  .theme-card:hover { transform: translateY(-8px); border-color: color-mix(in srgb, var(--primary) 40%, transparent); box-shadow: 0 30px 40px -15px rgba(0, 0, 0, 0.6), 0 0 30px color-mix(in srgb, var(--primary) 20%, transparent); }
+  .theme-card:hover::before { transform: scaleX(1); animation: shimmer 2s linear infinite; }
+  .theme-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+  .theme-number { font-size: 0.8rem; font-weight: 700; color: var(--primary); background: color-mix(in srgb, var(--primary) 12%, transparent); padding: 0.3rem 0.9rem; border-radius: 30px; border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent); }
+  .theme-title { font-size: 1.4rem; font-weight: 700; margin: 1rem 0 1.5rem; color: #f8fafc; line-height: 1.3; }
+  [data-theme="light"] .theme-title { color: #0f172a; }
+  .material-block { margin-top: 1.2rem; padding-top: 1rem; border-top: 1px dashed rgba(255, 255, 255, 0.1); display: flex; flex-direction: column; gap: 0.8rem; }
+  [data-theme="light"] .material-block { border-top-color: rgba(15, 23, 42, 0.1); }
+  .btn { border: none; padding: 0.7rem 1.4rem; border-radius: 40px; font-weight: 600; font-size: 0.85rem; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.25s; text-decoration: none; width: 100%; }
+  .btn-pdf { background: var(--bg-dark2); color: var(--primary2); border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent); }
+  .btn-pdf:hover { background: color-mix(in srgb, var(--primary) 25%, transparent); transform: translateY(-2px); box-shadow: 0 8px 16px -4px color-mix(in srgb, var(--primary) 35%, transparent); }
+  .btn-extra { background: linear-gradient(135deg, var(--accent), var(--accent-pink)); color: white; box-shadow: 0 5px 15px color-mix(in srgb, var(--accent) 40%, transparent); }
+  .btn-extra:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 12px 20px -8px color-mix(in srgb, var(--accent) 55%, transparent); }
+  .btn-final { background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; box-shadow: 0 5px 15px color-mix(in srgb, var(--primary) 40%, transparent); }
+  .btn-final:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 12px 20px -8px color-mix(in srgb, var(--primary) 55%, transparent); }
+  footer { text-align: center; padding: 3rem 2rem; color: var(--text-muted); font-size: 0.9rem; background: var(--glass-bg); backdrop-filter: blur(20px); border-radius: 2rem; border: 1px solid var(--glass-border); margin-bottom: 3rem; line-height: 1.8; }
+  footer strong { color: var(--text-main); }
+  footer i { color: var(--primary); margin: 0 5px; }
+  @media (max-width: 780px) { .container { padding: 0 1.2rem; } .themes-grid { grid-template-columns: 1fr; } .hero-text h1 { font-size: 2rem; } .hero-content { padding: 2rem; } .section-card { padding: 1.5rem; } .badge { animation: none; } .theme-toggle { width: 50px; height: 50px; font-size: 1.1rem; top: 15px; right: 15px; } .dropdown-menu { grid-template-columns: 1fr; } }
+`;
+
+function buildHTML() {
+  const data = {
+    teacher: document.getElementById('teacherName').value || 'ФИО педагога',
+    org: document.getElementById('orgName').value || 'Областной Дворец творчества детей и молодежи',
+    department: document.getElementById('department').value || 'Отдел компьютерных технологий',
+    course: document.getElementById('courseName').value || 'WEB-разработка',
+    subtitle: document.getElementById('courseSubtitle').value || 'Интерактивные материалы и конспекты на 2 года обучения'
+  };
+
+  const theme = THEMES[selectedTheme] || THEMES.cyber;
+  const themeVars = Object.entries(theme.vars).map(([k,v]) => `${k}: ${v};`).join('\n    ');
+
+  const dataUrlFiles = [];
+  let fileIndex = 0;
+
+  const topicsHtml = topics.map((t, idx) => {
+    const title = escapeHtml(t.title || `Тема ${idx + 1}`);
+    const buttons = t.files.map(m => {
+      const cat = getAllCategories().find(c => c.key === m.type) || DEFAULT_FILE_TYPES[0];
+      const href = getMaterialHref(m);
+      if (!href) return '';
+      const label = escapeHtml(m.name || cat.label);
+      const btnClass = cat.btnClass || 'btn-pdf';
+
+      if (m.mode === 'file' && m.dataUrl) {
+        const fileId = `file_${fileIndex++}`;
+        dataUrlFiles.push({ id: fileId, dataUrl: m.dataUrl, fileName: m.dataFileName || m.name || 'file', fileType: m.dataFileType || '' });
+        return `<a href="#" data-file-id="${fileId}" class="btn ${btnClass} material-link">
+          <i class="${cat.icon}"></i> ${label}
+        </a>`;
+      }
+
+      return `<a href="${escapeAttr(href)}" target="_blank" rel="noopener" class="btn ${btnClass}">
+        <i class="${cat.icon}"></i> ${label}
+      </a>`;
+    }).filter(Boolean).join('');
+
+    return `
+      <div class="theme-card animate-on-scroll" id="topic-${idx + 1}">
+        <div class="theme-header"><span class="theme-number">Тема ${idx + 1}</span></div>
+        <div class="theme-title">${title}</div>
+        <div class="material-block">
+          ${buttons || '<div style="color:var(--text-muted); font-style:italic;">Нет материалов</div>'}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const dropdownLinks = topics.map((t, idx) => {
+    const title = escapeHtml(t.title || `Тема ${idx + 1}`);
+    return `<a href="#topic-${idx + 1}" class="topic-link">
+      <span class="topic-num">${idx + 1}</span>
+      <span style="flex:1;">${title}</span>
+    </a>`;
+  }).join('');
+
+  const blobConverterScript = dataUrlFiles.length > 0 ? `
+  (function() {
+    const files = ${JSON.stringify(dataUrlFiles)};
+    const blobUrls = {};
+    
+    function dataURLtoBlob(dataURL) {
+      const parts = dataURL.split(',');
+      const mime = parts[0].match(/:(.*?);/)[1];
+      const raw = atob(parts[1]);
+      const arr = new Uint8Array(raw.length);
+      for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+      return new Blob([arr], { type: mime });
+    }
+    
+    files.forEach(f => {
+      try {
+        const blob = dataURLtoBlob(f.dataUrl);
+        blobUrls[f.id] = { url: URL.createObjectURL(blob), fileName: f.fileName, fileType: f.fileType };
+      } catch(e) { console.error('Ошибка конвертации файла', f.id, e); }
+    });
+    
+    document.querySelectorAll('.material-link').forEach(link => {
+      const fileId = link.getAttribute('data-file-id');
+      const blobInfo = blobUrls[fileId];
+      if (blobInfo) {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const isPdf = blobInfo.fileType === 'application/pdf' || blobInfo.fileName.toLowerCase().endsWith('.pdf');
+          const isImage = blobInfo.fileType.startsWith('image/');
+          
+          if (isPdf || isImage) {
+            const win = window.open('', '_blank');
+            if (win) {
+              if (isImage) {
+                win.document.write('<html><head><title>' + blobInfo.fileName + '</title><style>body{margin:0;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh;}img{max-width:100%;max-height:100vh;}</style></head><body><img src="' + blobInfo.url + '"></body></html>');
+              } else {
+                win.document.write('<html><head><title>' + blobInfo.fileName + '</title></head><body style="margin:0;"><iframe src="' + blobInfo.url + '" style="width:100vw;height:100vh;border:none;"></iframe></body></html>');
+              }
+              win.document.close();
+            }
+          } else {
+            const a = document.createElement('a');
+            a.href = blobInfo.url;
+            a.download = blobInfo.fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          }
+        });
+      }
+    });
+  })();` : '';
+
+  return `<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ЭОМК | Портфолио педагога</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.18/300.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.18/400.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.18/600.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.18/700.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.18/800.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  :root { ${themeVars} }
+  ${ORIGINAL_CSS}
+</style>
+</head>
+<body>
+
+<div class="bg-gradient"></div>
+<div class="bg-pattern"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Переключить тему">
+  <i class="fas fa-sun"></i>
+  <i class="fas fa-moon"></i>
+</button>
+
+<div class="container">
+  <div class="hero">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1 class="gr1"><i class="fas fa-laptop-code"></i> ЭОМК педагога<br>${escapeHtml(data.department)}<br><span class="span">| ${escapeHtml(data.org)}</span></h1>
+        <h1 class="gr2"><i class="fas fa-code"></i> ${escapeHtml(data.course)}</h1>
+        <p>| ${escapeHtml(data.subtitle)}</p>
+      </div>
+      <h2 class="badge"><i class="fas fa-chalkboard-user"></i> ${escapeHtml(data.teacher).toUpperCase()}</h2>
+    </div>
+  </div>
+
+  <details class="dropdown-nav animate-on-scroll">
+    <summary>
+      <i class="fas fa-bars"></i>
+      <span>Все темы курса</span>
+      <i class="fas fa-chevron-down" style="margin-left: auto; font-size: 0.8rem;"></i>
+    </summary>
+    <div class="dropdown-menu-wrapper">
+      <div class="dropdown-menu">
+        ${dropdownLinks || '<div style="color:var(--text-muted); grid-column:1/-1; text-align:center; padding:1rem;">Темы пока не добавлены</div>'}
+      </div>
+    </div>
+  </details>
+
+  <div class="section-card animate-on-scroll">
+    <h2 class="section-title"><i class="fas fa-list-ol"></i> Все темы курса</h2>
+    <div class="themes-grid">
+      ${topicsHtml || '<div style="color:var(--text-muted); grid-column:1/-1; text-align:center; padding:2rem;">Темы пока не добавлены</div>'}
+    </div>
+  </div>
+
+  <footer class="animate-on-scroll">
+    <i class="fas fa-file-pdf"></i> <strong>«Открыть PDF»</strong> — просмотр конспекта или раздаточного материала в новой вкладке.<br>
+    <i class="fas fa-link"></i> <strong>«Дополнительный материал» и «Практическая работа»</strong> — ссылки на интерактивные ресурсы (Google-классы).<br>
+    <i class="fas fa-star"></i> <strong>«Проверка знаний», «Референс», «Исходник»</strong> — дополнительные материалы.<br>
+    <br>
+    Страница полностью автономна.
+  </footer>
+</div>
+
+<script>
+  (function() {
+    const toggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+    const saved = localStorage.getItem('emk_theme') || 'dark';
+    html.setAttribute('data-theme', saved);
+    toggle.addEventListener('click', () => {
+      const cur = html.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('emk_theme', next);
+    });
+  })();
+
+  (function() {
+    const dropdown = document.querySelector('.dropdown-nav');
+    const wrapper = document.querySelector('.dropdown-menu-wrapper');
+    if (!dropdown || !wrapper) return;
+    dropdown.addEventListener('toggle', function() {
+      if (this.open) wrapper.classList.add('open');
+      else wrapper.classList.remove('open');
+    });
+  })();
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+
+  document.querySelectorAll('.topic-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      const href = this.getAttribute('href');
+      if (href) {
+        const target = document.querySelector(href);
+        if (target) {
+          const dropdown = document.querySelector('.dropdown-nav');
+          if (dropdown) dropdown.open = false;
+          setTimeout(() => {
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 200);
+        }
+      }
+    });
+  });
+
+  ${blobConverterScript}
+<\/script>
+</body>
+</html>`;
+}
+
+function previewHTML() {
+  const html = buildHTML();
+  const box = document.getElementById('previewBox');
+  box.innerHTML = '';
+  const iframe = document.createElement('iframe');
+  iframe.style.width = '100%';
+  iframe.style.height = '700px';
+  iframe.style.border = 'none';
+  iframe.style.borderRadius = '12px';
+  iframe.style.background = '#020617';
+  box.appendChild(iframe);
+  iframe.srcdoc = html;
+}
+
+function generateAndDownload() {
+  const html = buildHTML();
+  const teacher = document.getElementById('teacherName').value || 'педагог';
+  const course = document.getElementById('courseName').value || 'ЭОМК';
+  const filename = `ЭОМК_${teacher.replace(/\s+/g,'_')}_${course.replace(/\s+/g,'_')}.html`;
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('HTML-документ успешно сгенерирован и скачан!', 'success');
+}
+
+function loadDemo() {
+  document.getElementById('teacherName').value = 'Москалева Екатерина Юрьевна';
+  document.getElementById('orgName').value = 'Областной Дворец творчества детей и молодежи';
+  document.getElementById('department').value = 'Отдел компьютерных технологий';
+  document.getElementById('courseName').value = 'WEB-разработка';
+  document.getElementById('courseSubtitle').value = 'Интерактивные материалы и конспекты на 2 года обучения';
+
+  topics = [];
+  topicIdCounter = 0;
+  collapsedTopics.clear();
+  addTopic({ id: 0, title: 'Введение в HTML', files: [
+    { uid: uid(), type: 'pdf', name: 'Конспект_HTML.pdf', dataUrl: null, mode: 'file', linkUrl: '' },
+    { uid: uid(), type: 'extra', name: 'Google-класс: Основы HTML', dataUrl: null, mode: 'link', linkUrl: 'https://classroom.google.com/c/html-basics' },
+    { uid: uid(), type: 'practice', name: 'Практика: первая страница', dataUrl: null, mode: 'file', linkUrl: '' },
+    { uid: uid(), type: 'test', name: 'Тест по HTML', dataUrl: null, mode: 'link', linkUrl: 'https://forms.office.com/html-test' }
+  ]});
+  addTopic({ id: 1, title: 'Основы CSS', files: [
+    { uid: uid(), type: 'pdf', name: 'Конспект_CSS.pdf', dataUrl: null, mode: 'file', linkUrl: '' },
+    { uid: uid(), type: 'practice', name: 'Практика: стилизация', dataUrl: null, mode: 'file', linkUrl: '' },
+    { uid: uid(), type: 'reference', name: 'Референс макетов', dataUrl: null, mode: 'link', linkUrl: 'https://dribbble.com/css' }
+  ]});
+  addTopic({ id: 2, title: 'JavaScript для начинающих', files: [
+    { uid: uid(), type: 'pdf', name: 'Конспект_JS.pdf', dataUrl: null, mode: 'file', linkUrl: '' },
+    { uid: uid(), type: 'extra', name: 'MDN: Документация JS', dataUrl: null, mode: 'link', linkUrl: 'https://developer.mozilla.org/ru/docs/Web/JavaScript' },
+    { uid: uid(), type: 'source', name: 'Исходники JS.zip', dataUrl: null, mode: 'file', linkUrl: '' }
+  ]});
+  renderTopics();
+  showToast('Демо-данные загружены', 'info');
+}
+
+function clearAll() {
+  if (!confirm('Очистить все поля?')) return;
+  ['teacherName','orgName','department','courseName','courseSubtitle'].forEach(id => document.getElementById(id).value = '');
+  topics = [];
+  topicIdCounter = 0;
+  collapsedTopics.clear();
+  selectedTheme = 'cyber';
+  renderThemePicker();
+  renderTopics();
+  document.getElementById('previewBox').innerHTML = 'Заполните форму и нажмите «Предпросмотр»';
+  showToast('Все поля очищены', 'info');
+}
+
+renderThemePicker();
+renderCategoriesList();
+document.getElementById('newCategoryIconPreview').className = selectedNewIcon;
+addTopic();
+</script>
+</body>
+</html>
